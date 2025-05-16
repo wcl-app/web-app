@@ -1,4 +1,3 @@
-// 轮播图功能
 document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.querySelector('.carousel');
     const carouselInner = carousel.querySelector('.carousel-inner');
@@ -396,99 +395,68 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMenu();
 
     // 侧边栏功能
-    const sidebar = document.querySelector('.main_mnQNg');
-    const navButton = document.querySelector('.nav_I260C');
+    const sidebarModule = document.querySelector('.main_mnQNg');
+    const sidebarContent = document.querySelector('.modal_BUPIl');
     const mask = document.querySelector('.mask_Mfk_M');
-    let isOpen = false;
+    const navButton = document.querySelector('.nav_I260C');
 
-    // 初始化侧边栏状态
-    if (sidebar) {
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.transition = 'transform 0.3s ease-in-out';
-        
-        // 只隐藏 lastinfo 和三级菜单，不隐藏二级菜单标题
-        const allContents = sidebar.querySelectorAll('.item2_lastinfo_U8TDH, .item3_title__jyNj, .item3_title_new_yxTCj');
-        allContents.forEach(content => {
-            content.style.display = 'none';
-            const icon = content.querySelector('.item_count_RpPBp');
-            if (icon) icon.textContent = '+';
-        });
+    // 初始化：隐藏侧边栏和遮罩层
+    function initSidebar() {
+        if (sidebarModule) sidebarModule.style.pointerEvents = 'none';
+        if (sidebarContent) {
+            sidebarContent.style.transition = 'left 0.3s';
+            sidebarContent.style.left = '-95vw'; // 初始在屏幕外
+        }
+        if (mask) {
+            mask.style.opacity = '0';
+            mask.style.pointerEvents = 'none';
+            mask.style.transition = 'opacity 0.3s';
+        }
     }
+    initSidebar();
 
-    // 打开侧边栏
+    // 打开侧边栏（滑入）
     function openSidebar() {
-        if (!sidebar) return;
-        isOpen = true;
-        sidebar.style.transform = 'translateX(0)';
+        if (sidebarModule) sidebarModule.style.pointerEvents = 'auto';
+        if (sidebarContent) sidebarContent.style.left = '0';
         if (mask) {
-            mask.style.display = 'block';
-            mask.style.opacity = '0';
-            setTimeout(() => {
-                mask.style.opacity = '1';
-            }, 10);
+            mask.style.opacity = '1';
+            mask.style.pointerEvents = 'auto';
         }
     }
 
-    // 关闭侧边栏
+    // 关闭侧边栏（滑出）
     function closeSidebar() {
-        if (!sidebar) return;
-        isOpen = false;
-        sidebar.style.transform = 'translateX(-100%)';
+        if (sidebarModule) sidebarModule.style.pointerEvents = 'none';
+        if (sidebarContent) sidebarContent.style.left = '-90vw';
         if (mask) {
             mask.style.opacity = '0';
-            setTimeout(() => {
-                mask.style.display = 'none';
-            }, 300);
+            mask.style.pointerEvents = 'none';
         }
     }
 
-    // 点击导航按钮打开侧边栏
+    // 点击按钮打开
     if (navButton) {
-        navButton.addEventListener('click', (e) => {
+        navButton.addEventListener('click', function(e) {
             e.stopPropagation();
             openSidebar();
         });
     }
 
-    // 点击遮罩关闭侧边栏
+    // 点击遮罩关闭
     if (mask) {
         mask.addEventListener('click', closeSidebar);
+        mask.addEventListener('touchstart', closeSidebar);
     }
 
-    // 添加触摸滑动支持
-    if (sidebar) {
-        sidebar.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        }, { passive: true });
-
-        sidebar.addEventListener('touchmove', (e) => {
-            if (!isOpen) return;
-            currentX = e.touches[0].clientX;
-            const diff = currentX - startX;
-            
-            if (diff < 0) { // 只允许向左滑动关闭
-                const translateX = Math.max(-100, diff / sidebar.offsetWidth * 100);
-                sidebar.style.transform = `translateX(${translateX}%)`;
-            }
-        }, { passive: true });
-
-        sidebar.addEventListener('touchend', () => {
-            if (!isOpen) return;
-            const diff = currentX - startX;
-            if (diff < -50) { // 如果滑动超过50px，则关闭侧边栏
-                closeSidebar();
-            } else {
-                openSidebar();
-            }
+    // 阻止点击侧边栏内容时冒泡到遮罩层
+    if (sidebarContent) {
+        ['click', 'touchstart', 'touchend'].forEach(evt => {
+            sidebarContent.addEventListener(evt, function(e) {
+                e.stopPropagation();
+            });
         });
     }
-
-    // 添加ESC键关闭侧边栏
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isOpen) {
-            closeSidebar();
-        }
-    });
 
     function showActiveTabContent() {
         let activeIdx = 0;
@@ -513,6 +481,21 @@ document.addEventListener('DOMContentLoaded', function() {
             contents.forEach((content, cidx) => {
                 content.style.display = cidx === idx ? 'block' : 'none';
             });
+        });
+    });
+
+    // 阻止点击 tabs_rjDxN 区域冒泡到遮罩层
+    const tabsContent = document.querySelector('.tabs_rjDxN');
+    if (tabsContent) {
+        tabsContent.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
+    // 阻止点击每个 item_5jee8 区域冒泡到遮罩层
+    document.querySelectorAll('.item_5jee8').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     });
 });
