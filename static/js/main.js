@@ -298,48 +298,75 @@ document.addEventListener('DOMContentLoaded', function() {
             let nextElement = title.nextElementSibling;
             const contents = [];
 
-            // 检查下一个元素是否是 lastInfo，并收集三级菜单标题
-            // 注意：lastInfo 和三级菜单都在同一个item2_aAzaY容器内，紧跟在 item2_title_xGvQf 后面
-            // 收集紧跟在 .item2_title_xGvQf 后面的所有内容，直到遇到下一个 .item2_title_xGvQf 或父容器结束
-             while (nextElement && !nextElement.classList.contains('item2_title_xGvQf') && !nextElement.classList.contains('item1_title_U9yIw')) { // 修改这里的停止条件
-                 // 收集 lastInfo 和三级菜单标题
-                if (nextElement.classList.contains('item2_lastinfo_U8TDH') ||
+            // 收集所有三级菜单内容和图片div，直到遇到下一个二级菜单或更高层级
+            while (
+                nextElement &&
+                !nextElement.classList.contains('item2_title_xGvQf') &&
+                !nextElement.classList.contains('item2_aAzaY') &&
+                !nextElement.classList.contains('item1_title_U9yIw')
+            ) {
+                // 收集三级菜单内容和所有图片外层容器
+                if (
                     nextElement.classList.contains('item3_title__jyNj') ||
-                    nextElement.classList.contains('item3_title_new_yxTCj')) {
+                    nextElement.classList.contains('item3_title_new_yxTCj') ||
+                    nextElement.classList.contains('item3_img_box_n7aON') ||
+                    nextElement.classList.contains('item3_img1_A39b4') ||
+                    nextElement.classList.contains('item3_img2_e1e_g') ||
+                    nextElement.classList.contains('item3_img3_lFeYa')
+                ) {
                     contents.push(nextElement);
-                } else if (nextElement.querySelectorAll) {
-                    // 兼容被div包裹的情况，查找内部的三级菜单
-                     nextElement.querySelectorAll('.item3_title__jyNj, .item3_title_new_yxTCj').forEach(sub => contents.push(sub));
+                }
+                // 兼容图片div被包裹的情况
+                if (nextElement.querySelectorAll) {
+                    nextElement.querySelectorAll(
+                        '.item3_title__jyNj, .item3_title_new_yxTCj, .item3_img_box_n7aON, .item3_img1_A39b4, .item3_img2_e1e_g, .item3_img3_lFeYa'
+                    ).forEach(sub => contents.push(sub));
                 }
                 nextElement = nextElement.nextElementSibling;
             }
 
+            // 初始隐藏
+            contents.forEach(content => { content.style.display = 'none'; });
+            if (icon) icon.textContent = '+';
 
             // 点击事件
             title.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-
-                 // 判断是否展开
                 const isOpen = contents.length > 0 && contents[0].style.display === 'block';
-
-                // 切换显示状态和动画
                 contents.forEach(content => {
-                     content.style.display = isOpen ? 'none' : 'block';
-                      if (!isOpen) {
-                        // 添加展开动画
+                    content.style.display = isOpen ? 'none' : 'block';
+                    if (!isOpen) {
                         content.style.opacity = '0';
                         content.style.transform = 'translateY(-10px)';
                         content.style.transition = 'opacity 0.3s, transform 0.3s';
-                        // 强制浏览器重绘以应用初始状态
                         content.offsetHeight;
-                        // 动画到最终状态
                         content.style.opacity = '1';
                         content.style.transform = 'translateY(0)';
                     }
+                    // 新增：如果是外层图片容器，联动里面所有图片和内容div
+                    if (!isOpen && (content.classList.contains('item3_img_box_n7aON') ||
+                                    content.classList.contains('item3_img1_A39b4') ||
+                                    content.classList.contains('item3_img2_e1e_g') ||
+                                    content.classList.contains('item3_img3_lFeYa'))) {
+                        content.querySelectorAll(
+                            '.item3_img1_box_y92gE, .item3_img2_e1e_g, .item3_img3_box_pJ2Hj, .item3_title__jyNj, .item3_title_new_yxTCj'
+                        ).forEach(inner => {
+                            inner.style.display = 'block';
+                        });
+                    }
+                    // 关闭时也要隐藏内层
+                    if (isOpen && (content.classList.contains('item3_img_box_n7aON') ||
+                                   content.classList.contains('item3_img1_A39b4') ||
+                                   content.classList.contains('item3_img2_e1e_g') ||
+                                   content.classList.contains('item3_img3_lFeYa'))) {
+                        content.querySelectorAll(
+                            '.item3_img1_box_y92gE, .item3_img2_e1e_g, .item3_img3_box_pJ2Hj, .item3_title__jyNj, .item3_title_new_yxTCj'
+                        ).forEach(inner => {
+                            inner.style.display = 'none';
+                        });
+                    }
                 });
-
-                // 切换图标
                 if (icon) icon.textContent = isOpen ? '+' : '-';
             };
         });
@@ -350,43 +377,48 @@ document.addEventListener('DOMContentLoaded', function() {
             let nextElement = title.nextElementSibling;
             const contents = [];
 
-            // 收集所有子项
-             while (nextElement && !nextElement.classList.contains('item3_title__jyNj') && !nextElement.classList.contains('item3_title_new_yxTCj') && !nextElement.classList.contains('item2_title_xGvQf') && !nextElement.classList.contains('item2_aAzaY') && !nextElement.classList.contains('item1_title_U9yIw')) { // 修改这里的停止条件
-                 contents.push(nextElement);
+            while (
+                nextElement &&
+                !nextElement.classList.contains('item3_title__jyNj') &&
+                !nextElement.classList.contains('item3_title_new_yxTCj') &&
+                !nextElement.classList.contains('item2_title_xGvQf') &&
+                !nextElement.classList.contains('item2_aAzaY') &&
+                !nextElement.classList.contains('item1_title_U9yIw')
+            ) {
+                // 如果是图片div或内容div，直接收集
+                contents.push(nextElement);
+                // 如果有嵌套，递归收集
+                if (nextElement.querySelectorAll) {
+                    nextElement.querySelectorAll('.item3_img1_box_y92gE, .item3_img2_e1e_g, .item3_img3_box_pJ2Hj').forEach(sub => contents.push(sub));
+                }
                 nextElement = nextElement.nextElementSibling;
             }
 
-            // 初始隐藏子项
-             contents.forEach(content => { content.style.display = 'none'; });
-             if (icon) icon.textContent = '+'; // 三级菜单图标初始为 '+'
-
+            // 初始隐藏所有内容
+            contents.forEach(content => { content.style.display = 'none'; });
+            if (icon) icon.textContent = '+';
 
             // 点击事件
             title.onclick = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // 判断是否展开
                 const isOpen = contents.length > 0 && contents[0].style.display === 'block';
 
                 // 切换显示状态和动画
                 contents.forEach(content => {
-                     content.style.display = isOpen ? 'none' : 'block';
-                      if (!isOpen) {
-                        // 添加展开动画
+                    content.style.display = isOpen ? 'none' : 'block';
+                    if (!isOpen) {
                         content.style.opacity = '0';
                         content.style.transform = 'translateY(-10px)';
                         content.style.transition = 'opacity 0.3s, transform 0.3s';
-                        // 强制浏览器重绘以应用初始状态
                         content.offsetHeight;
-                        // 动画到最终状态
                         content.style.opacity = '1';
                         content.style.transform = 'translateY(0)';
                     }
                 });
 
-                // 切换图标
-                 if (icon) icon.textContent = isOpen ? '+' : '-';
+                if (icon) icon.textContent = isOpen ? '+' : '-';
             };
         });
     }
@@ -497,5 +529,10 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', function(e) {
             e.stopPropagation();
         });
+    });
+
+    // 初始化隐藏所有三级菜单图片div
+    document.querySelectorAll('.item3_img1_box_y92gE, .item3_img2_e1e_g, .item3_img3_box_pJ2Hj').forEach(imgDiv => {
+        imgDiv.style.display = 'none';
     });
 });
